@@ -8,6 +8,7 @@
 
 import { addEvent } from "./eventManager";
 
+// 리얼 돔을 만드는 함수
 export function createElement(vNode) {
   if (vNode === null || vNode === undefined || typeof vNode === "boolean") {
     return document.createTextNode("");
@@ -24,26 +25,28 @@ export function createElement(vNode) {
     });
     return $el;
   }
-
+  // vNode.type에 해당하는 요소를 생성
   const $el = document.createElement(vNode.type);
+  // vNode.props의 속성들을 적용 (이벤트 리스너, className, 일반 속성 등 처리)
   updateAttributes($el, vNode.props);
+  // vNode.children의 각 자식에 대해 createElement를 재귀 호출하여 추가
   vNode.children.forEach((child) => {
     $el.appendChild(createElement(child));
   });
+  console.log("$el in createElement", $el);
   return $el;
 }
 
 function updateAttributes($el, props) {
-  Object.entries(props).forEach(([key, value]) => {
-    switch (key) {
-      case "className":
+  Object.entries(props || {})
+    .filter(([, value]) => value)
+    .forEach(([attr, value]) => {
+      if (attr === "className") {
         $el.className = value;
-        break;
-      case "onClick":
+      } else if (attr === "onClick") {
         addEvent($el, "click", value);
-        break;
-      default:
-        $el[key] = value;
-    }
-  });
+      } else {
+        $el.setAttribute(attr, value);
+      }
+    });
 }
