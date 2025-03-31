@@ -7,6 +7,7 @@ import { NotFoundPage } from "./pages";
 
 export function render() {
   const Page = router.get().getTarget() ?? NotFoundPage;
+  console.log("Page in render", router.get().getTarget());
   const $root = document.querySelector("#root");
 
   try {
