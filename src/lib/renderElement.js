@@ -3,20 +3,16 @@ import { createElement } from "./createElement";
 import { normalizeVNode } from "./normalizeVNode";
 import { updateElement } from "./updateElement";
 
+// vNode를 정규화 한 다음에
+// createElement로 노드를 만들고
+// container에 삽입하고
+// 이벤트를 등록합니다.
+
 // TODO: 컨테이너별 관리
 // 이전 가상 DOM 트리를 저장할 Map (컨테이너별로 관리)
 const previousVNodeMap = new Map();
 
-/**
- * vNode를 container에 렌더링합니다.
- * @param {Object} vNode - 가상 DOM 노드
- * @param {Element|string} container - 렌더링할 컨테이너 요소 또는 선택자
- * @returns {Element} 렌더링된 컨테이너 요소
- */
 export function renderElement(vNode, container) {
-  console.log("vNode in renderElement", vNode);
-  console.log("container in renderElement", typeof container, container);
-
   // 1. vNode 정규화
   const normalizedVNode = normalizeVNode(vNode);
 
@@ -39,8 +35,4 @@ export function renderElement(vNode, container) {
 
   // 5. 이벤트 리스너 설정 - 선택자 문자열 사용
   setupEventListeners(container);
-
-  // 6. 렌더링된 컨테이너 반환
-  console.log("container in renderElement", container);
-  return container;
 }

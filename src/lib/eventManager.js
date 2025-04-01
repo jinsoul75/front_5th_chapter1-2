@@ -3,89 +3,73 @@
 
 // 이벤트 저장소
 const eventStore = new Map();
+// WeakMap -> cursor사용
+// TODO:무엇인가? -> 메모리에 더 좋음
+const containerEventTypes = new WeakMap();
 
 // 이벤트 등록 함수
 export function addEvent(element, eventType, handler) {
   // 요소별 이벤트 저장
-  if (!eventStore.has(element)) {
-    eventStore.set(element, new Map());
+  if (!eventStore.has(eventType)) {
+    eventStore.set(eventType, new Map());
   }
 
-  const elementEvents = eventStore.get(element);
-  if (!elementEvents.has(eventType)) {
-    elementEvents.set(eventType, new Set());
-  }
-
-  elementEvents.get(eventType).add(handler);
+  const elementEvents = eventStore.get(eventType);
+  elementEvents.set(element, handler);
 }
 
-// 지원할 이벤트 유형들
-const supportedEvents = [
-  "click",
-  "mouseover",
-  "mouseout",
-  "focus",
-  "blur",
-  "keydown",
-  "keyup",
-  "keypress",
-  "input",
-  "change",
-];
-
-const containerEventTypes = new WeakMap();
-
+// 이벤트 위임 설정하는 함수
 export function setupEventListeners(root) {
-  // root가 DOM 요소인지 확인
-  const $root = typeof root === "string" ? document.querySelector(root) : root;
+  // root -> 이벤트 리스너가 연결될 상위 컨테이너 요소
+  // ex) setupEventListeners(document.getElementById('app')) 호출시 'app' 요소
 
-  if (!$root || !($root instanceof Element)) {
-    console.error("Invalid root element:", $root);
-    return;
+  // 루트 요소가 처음 등록되는 경우 빈 Set 생성
+  if (!containerEventTypes.has(root)) {
+    containerEventTypes.set(root, new Set());
   }
 
-  // 이미 설정된 이벤트 타입 확인
-  let handledEvents = new Set();
-  if (containerEventTypes.has($root)) {
-    handledEvents = containerEventTypes.get($root);
-  } else {
-    containerEventTypes.set($root, handledEvents);
-  }
+  // 현재 루트요소에 이미 등록된 이벤트타임 set 가져오기
+  // ex) 'app' 요소에 이미 'click' 이벤트가 등록되어 있다면, events는 Set('click')
+  const events = containerEventTypes.get(root);
+  console.log("events", events);
+  // 등록된 모든 이벤트 타입에 대해서 반복
+  // ex) events에 'click' 이벤트가 등록되어 있다면, 각각에 대해 반복
+  eventStore.forEach((delegates, eventType) => {
+    // 이미 등록된 이벤트 타입이면 건너뜀
+    // ex) 'click' 이벤트가 등록되어 있다면, click 처리 건너뜀
+    console.log("events", events);
+    if (events.has(eventType)) return;
 
-  // 모든 지원 이벤트에 대해 리스너 설정 (아직 설정되지 않은 것만)
-  supportedEvents.forEach((eventType) => {
-    if (!handledEvents.has(eventType)) {
-      $root.addEventListener(eventType, (event) =>
-        handleEvent(event, eventType),
-      );
-      handledEvents.add(eventType);
-    }
+    // 루트 요소에 이벤트 리스너 등록
+    // ex) app.addEventListener('click', (event) => { ... })
+    root.addEventListener(eventType, (event) => {
+      console.log("eventType", eventType);
+      // 해당 이벤트 타입에 등록된 모든 대상 요소와 핸들러 쌍을 반복
+      // 'click' 이벤트에 대해 {'삭제 버튼' => handleDelete, '할일 항목' => handleToggle}과 같은 매핑이 있다면, 각각에 대해 반복
+      for (const [target, handler] of delegates) {
+        // 이벤트가 발생한 요소가 현재 대상 요소 내부에 있는지 확인
+        // ex) 삭제 버튼 클릭 시, 이벤트가 발생한 요소가 삭제 버튼 내부에 있는지 확인
+        if (target.contains(event.target)) {
+          // 핸들러 호출
+          // ex) handleDelete.call(삭제 버튼, 클릭 이벤트)
+          handler.call(target, event);
+        }
+      }
+    });
+
+    // 이벤트 타입 등록
+    // 'click' 이벤트를 처리한 후, boundEvents.add('click')으로 'click'을 등록된 이벤트 목록에 추가
+    events.add(eventType);
   });
-}
-// 통합 이벤트 핸들러
-function handleEvent(e, eventType) {
-  // 이벤트가 발생한 요소부터 시작해서 해당 요소에 등록된 이벤트 핸들러 실행
-  let target = e.target;
-
-  // 이벤트 전파가 중단되었는지 확인
-  if (e.isPropagationStopped) return;
-
-  // 이벤트가 발생한 요소에 등록된 핸들러 실행
-  if (eventStore.has(target)) {
-    const elementEvents = eventStore.get(target);
-    if (elementEvents.has(eventType)) {
-      const handlers = elementEvents.get(eventType);
-      handlers.forEach((handler) => handler(e));
-    }
-  }
 }
 
 // 이벤트 제거 함수
 export function removeEvent(element, eventType, handler) {
-  if (eventStore.has(element)) {
-    const elementEvents = eventStore.get(element);
-    if (elementEvents.has(eventType)) {
-      elementEvents.get(eventType).delete(handler);
-    }
+  console.log("element in removeEvent", element);
+  const elementEvents = eventStore.get(eventType);
+  if (!elementEvents.has(element)) return;
+
+  if (elementEvents.get(element) === handler) {
+    elementEvents.delete(element);
   }
 }
