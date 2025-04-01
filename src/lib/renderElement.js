@@ -3,6 +3,7 @@ import { createElement } from "./createElement";
 import { normalizeVNode } from "./normalizeVNode";
 import { updateElement } from "./updateElement";
 
+// TODOL 컨테이너별 관리
 // 이전 가상 DOM 트리를 저장할 Map (컨테이너별로 관리)
 const previousVNodeMap = new Map();
 
