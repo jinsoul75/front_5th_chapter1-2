@@ -19,7 +19,22 @@ export function addEvent(element, eventType, handler) {
   elementEvents.get(eventType).add(handler);
 }
 
-// 이벤트 위임 설정
+// 지원할 이벤트 유형들
+const supportedEvents = [
+  "click",
+  "mouseover",
+  "mouseout",
+  "focus",
+  "blur",
+  "keydown",
+  "keyup",
+  "keypress",
+  "input",
+  "change",
+];
+
+const containerEventTypes = new WeakMap();
+
 export function setupEventListeners(root) {
   // root가 DOM 요소인지 확인
   const $root = typeof root === "string" ? document.querySelector(root) : root;
@@ -29,26 +44,43 @@ export function setupEventListeners(root) {
     return;
   }
 
-  // 이벤트 위임 구현
-  $root.addEventListener("click", (e) => {
-    // 이벤트가 발생한 요소부터 시작해서 해당 요소에 등록된 이벤트 핸들러 실행
-    let target = e.target;
+  // 이미 설정된 이벤트 타입 확인
+  let handledEvents = new Set();
+  if (containerEventTypes.has($root)) {
+    handledEvents = containerEventTypes.get($root);
+  } else {
+    containerEventTypes.set($root, handledEvents);
+  }
 
-    // 이벤트 전파가 중단되었는지 확인
-    if (e.isPropagationStopped) return;
-
-    // 이벤트가 발생한 요소에 등록된 핸들러 실행
-    if (eventStore.has(target)) {
-      const elementEvents = eventStore.get(target);
-      if (elementEvents.has("click")) {
-        const handlers = elementEvents.get("click");
-        handlers.forEach((handler) => handler(e));
-      }
+  // 모든 지원 이벤트에 대해 리스너 설정 (아직 설정되지 않은 것만)
+  supportedEvents.forEach((eventType) => {
+    if (!handledEvents.has(eventType)) {
+      $root.addEventListener(eventType, (event) =>
+        handleEvent(event, eventType),
+      );
+      handledEvents.add(eventType);
     }
   });
 }
+// 통합 이벤트 핸들러
+function handleEvent(e, eventType) {
+  // 이벤트가 발생한 요소부터 시작해서 해당 요소에 등록된 이벤트 핸들러 실행
+  let target = e.target;
 
-// 이벤트 제거 함수 (필요한 경우)
+  // 이벤트 전파가 중단되었는지 확인
+  if (e.isPropagationStopped) return;
+
+  // 이벤트가 발생한 요소에 등록된 핸들러 실행
+  if (eventStore.has(target)) {
+    const elementEvents = eventStore.get(target);
+    if (elementEvents.has(eventType)) {
+      const handlers = elementEvents.get(eventType);
+      handlers.forEach((handler) => handler(e));
+    }
+  }
+}
+
+// 이벤트 제거 함수
 export function removeEvent(element, eventType, handler) {
   if (eventStore.has(element)) {
     const elementEvents = eventStore.get(element);

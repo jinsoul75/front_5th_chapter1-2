@@ -3,7 +3,7 @@ import { createElement } from "./createElement";
 import { normalizeVNode } from "./normalizeVNode";
 import { updateElement } from "./updateElement";
 
-// TODOL 컨테이너별 관리
+// TODO: 컨테이너별 관리
 // 이전 가상 DOM 트리를 저장할 Map (컨테이너별로 관리)
 const previousVNodeMap = new Map();
 
@@ -30,7 +30,7 @@ export function renderElement(vNode, container) {
   } else {
     // 첫 렌더링: 새 DOM 요소 생성 및 추가
     const $el = createElement(normalizedVNode);
-    container.innerHTML = ""; // 컨테이너 내용 초기화 (선택적)
+
     container.appendChild($el);
   }
 

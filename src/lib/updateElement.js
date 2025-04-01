@@ -1,8 +1,13 @@
 import { addEvent, removeEvent } from "./eventManager";
 import { createElement } from "./createElement.js";
 
-// newNode와 oldNode의 속성을 비교하여 변경된 부분만 반영
+// newProps와 oldProps의 속성을 비교하여 변경된 부분만 반영
 function updateAttributes(target, newProps = {}, oldProps = {}) {
+  // oldProps가 null이나 undefined인 경우 빈 객체로 처리
+  oldProps = oldProps || {};
+  newProps = newProps || {};
+  console.log("oldProps", oldProps);
+  console.log("newProps", newProps);
   // 이전 속성 처리
   for (const [key, value] of Object.entries(oldProps)) {
     // 이벤트 처리 (on으로 시작하는 속성)

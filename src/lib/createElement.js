@@ -43,8 +43,10 @@ function updateAttributes($el, props) {
     .forEach(([attr, value]) => {
       if (attr === "className") {
         $el.className = value;
-      } else if (attr === "onClick") {
-        addEvent($el, "click", value);
+      } else if (attr.startsWith("on") && typeof value === "function") {
+        // 모든 이벤트 핸들러 처리
+        const eventType = attr.toLowerCase().substring(2); // 'onClick' -> 'click'
+        addEvent($el, eventType, value);
       } else {
         $el.setAttribute(attr, value);
       }
