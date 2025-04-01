@@ -3,42 +3,35 @@ import { createElement } from "./createElement.js";
 
 // newProps와 oldProps의 속성을 비교하여 변경된 부분만 반영
 function updateAttributes(target, newProps = {}, oldProps = {}) {
-  // 다른 돔 갈아끼우기 새 돔 추가
-  for (const [key, value] of Object.entries(newProps)) {
-    // 이벤트 처리 (on으로 시작하는 속성)
+  // 새로운 돔 트리를 순회
+  Object.entries(newProps).map(([key, value]) => {
+    // 이미 있는 속성이면 넘어가기
     if (oldProps[key] === value) return;
 
+    // className은 class로 변경
+    if (key === "className") key = "class";
+
+    // onClick -> click 이름 바꿔 이벤트 추가
     if (key.startsWith("on")) {
-      const eventType = key.toLowerCase().substring(2); // 'onClick' -> 'click'
-      // 이벤트 리스너 추가 (이전 리스너와 다른 경우)
-      if (value !== oldProps[key]) {
-        if (oldProps[key]) {
-          removeEvent(target, eventType, oldProps[key]);
-        }
-        addEvent(target, eventType, value);
-      }
-      continue;
+      return addEvent(target, key.replace("on", "").toLowerCase(), value);
     }
-  }
 
-  // 없어진 돔 처리
-  for (const [key, value] of Object.entries(oldProps)) {
-    // 이벤트 처리 (on으로 시작하는 속성)
+    target.setAttribute(key, value);
+  });
+
+  // old 돔 트리를 순회
+  Object.keys(oldProps).map((key) => {
+    // 새로운 돔트리에 없는 값이라면 넘어감
+    if (newProps[key] !== undefined) return;
+
+    // 이벤트 제거
     if (key.startsWith("on")) {
-      const eventType = key.toLowerCase().substring(2); // 'onClick' -> 'click'
-
-      if (!newProps[key]) {
-        // 새 속성에 없는 이벤트는 제거
-        removeEvent(target, eventType, value);
-      } else {
-        const attributeName = key === "className" ? "class" : key;
-
-        if (newProps[key] !== value) {
-          target.setAttribute(attributeName, newProps[key]);
-        }
-      }
+      removeEvent(target, key.replace("on", "").toLowerCase(), oldProps[key]);
     }
-  }
+
+    // 속성제거
+    target.removeAttribute(key);
+  });
 }
 
 export function updateElement(parentElement, newNode, oldNode, index = 0) {
