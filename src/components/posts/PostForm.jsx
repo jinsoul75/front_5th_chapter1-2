@@ -3,20 +3,20 @@ import { createVNode } from "../../lib";
 import { globalStore } from "../../stores/globalStore";
 
 export const PostForm = () => {
-  const { posts } = globalStore.getState();
+  const { posts, currentUser } = globalStore.getState();
   // 리액트라고 생각했을 때
   // onClick 한 함수 실행
   const handleSubmit = (e) => {
     e.preventDefault();
     const content = document.getElementById("post-content").value;
-    const author = globalStore.getState().currentUser.username;
+    const author = currentUser.username;
     const time = Date.now();
     const likeUsers = [];
 
     globalStore.setState({
       posts: [
         { id: posts.length + 1, author, time, content, likeUsers },
-        ...globalStore.getState().posts,
+        ...posts,
       ],
     });
   };

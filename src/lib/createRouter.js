@@ -3,7 +3,7 @@ import { BASE_PATH } from "../config/config";
 export const createRouter = (routes) => {
   const { subscribe, notify } = createObserver();
 
-  const getPath = () => window.location.pathname;
+  const getPath = () => window.location.pathname.replace(BASE_PATH, "");
 
   const getTarget = () => routes[getPath()];
 
