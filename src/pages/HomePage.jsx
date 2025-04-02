@@ -13,6 +13,24 @@ import { globalStore } from "../stores";
 export const HomePage = () => {
   const { posts, loggedIn } = globalStore.getState();
 
+  const handleLike = (id) => {
+    const post = posts.find((post) => post.id === id);
+    const likeUsers = post.likeUsers;
+    const currentUser = globalStore.getState().currentUser.username;
+
+    // 이미 좋아요 한 경우
+    if (likeUsers.includes(currentUser)) {
+      post.likeUsers = likeUsers.filter((user) => user !== currentUser);
+    } else {
+      // 좋아요 안 한 경우
+      post.likeUsers.push(currentUser);
+    }
+
+    globalStore.setState({
+      posts: posts.map((post) => (post.id === id ? post : post)),
+    });
+  };
+
   return (
     <div className="bg-gray-100 min-h-screen flex justify-center">
       <div className="max-w-md w-full">
@@ -26,7 +44,12 @@ export const HomePage = () => {
               .sort((a, b) => b.time - a.time)
               .map((props) => {
                 return (
-                  <Post {...props} activationLike={false} loggedIn={loggedIn} />
+                  <Post
+                    {...props}
+                    activationLike={false}
+                    loggedIn={loggedIn}
+                    handleLike={handleLike}
+                  />
                 );
               })}
           </div>

@@ -31,19 +31,18 @@ export function setupEventListeners(root) {
   // 현재 루트요소에 이미 등록된 이벤트타임 set 가져오기
   // ex) 'app' 요소에 이미 'click' 이벤트가 등록되어 있다면, events는 Set('click')
   const events = containerEventTypes.get(root);
-  console.log("events", events);
+
   // 등록된 모든 이벤트 타입에 대해서 반복
   // ex) events에 'click' 이벤트가 등록되어 있다면, 각각에 대해 반복
   eventStore.forEach((delegates, eventType) => {
     // 이미 등록된 이벤트 타입이면 건너뜀
     // ex) 'click' 이벤트가 등록되어 있다면, click 처리 건너뜀
-    console.log("events", events);
+
     if (events.has(eventType)) return;
 
     // 루트 요소에 이벤트 리스너 등록
     // ex) app.addEventListener('click', (event) => { ... })
     root.addEventListener(eventType, (event) => {
-      console.log("eventType", eventType);
       // 해당 이벤트 타입에 등록된 모든 대상 요소와 핸들러 쌍을 반복
       // 'click' 이벤트에 대해 {'삭제 버튼' => handleDelete, '할일 항목' => handleToggle}과 같은 매핑이 있다면, 각각에 대해 반복
       for (const [target, handler] of delegates) {
@@ -65,7 +64,6 @@ export function setupEventListeners(root) {
 
 // 이벤트 제거 함수
 export function removeEvent(element, eventType, handler) {
-  console.log("element in removeEvent", element);
   const elementEvents = eventStore.get(eventType);
   if (!elementEvents.has(element)) return;
 

@@ -1,7 +1,9 @@
 /** @jsx createVNode */
 import { createVNode } from "../../lib";
+import { globalStore } from "../../stores/globalStore";
 
 export const PostForm = () => {
+  const { posts } = globalStore.getState();
   // 리액트라고 생각했을 때
   // onClick 한 함수 실행
   const handleSubmit = (e) => {
