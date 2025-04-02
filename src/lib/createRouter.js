@@ -1,5 +1,5 @@
 import { createObserver } from "./createObserver";
-
+import { BASE_PATH } from "../config/config";
 export const createRouter = (routes) => {
   const { subscribe, notify } = createObserver();
 
@@ -8,7 +8,7 @@ export const createRouter = (routes) => {
   const getTarget = () => routes[getPath()];
 
   const push = (path) => {
-    window.history.pushState(null, null, path);
+    window.history.pushState(null, null, `${BASE_PATH}${path}`);
     notify();
   };
 

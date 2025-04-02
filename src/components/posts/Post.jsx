@@ -8,6 +8,7 @@ export const Post = ({
   content,
   likeUsers,
   activationLike = false,
+  isLoggedIn,
 }) => {
   return (
     <div className="bg-white rounded-lg shadow p-4 mb-4">
@@ -20,6 +21,11 @@ export const Post = ({
       <p>{content}</p>
       <div className="mt-2 flex justify-between text-gray-500">
         <span
+          onClick={() => {
+            isLoggedIn
+              ? console.log("좋아요 누름")
+              : alert("로그인 후 이용해주세요");
+          }}
           className={`like-button cursor-pointer${activationLike ? " text-blue-500" : ""}`}
         >
           좋아요 {likeUsers.length}
